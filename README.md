@@ -2,31 +2,18 @@
 
 One Python package provides all ten official RSSerpent plugins. Each subpackage of `rsserpent_plugins` exports a `plugin` object. See [Sources](SOURCES.md) for the original repositories and licenses.
 
-## Install and enable plugins
+## Deploy
 
-Use CPython 3.14 or 3.15 and RSSerpent 0.3 or later with the module configuration loader. Install the official plugin wheel in the same environment as the core:
-
-```sh
-uv pip install /path/to/rsserpent_plugins-0.3.0-py3-none-any.whl
-```
-
-To install from Git, use a full commit that contains the aggregate package:
-
-```sh
-uv pip install 'rsserpent-plugins @ git+https://github.com/RSSerpent-Rev/rsserpent-plugins.git@<commit>'
-```
-
-List the plugins to enable in `rsserpent.toml`:
+Use the [RSSerpent Docker guide](https://github.com/RSSerpent-Rev/RSSerpent/blob/main/docs/deployment/plugin.md) to run the official image with a TOML file. Add the official package requirement and select the modules you need.
 
 ```toml
+plugin_requirements = [
+  "rsserpent-plugins @ git+https://github.com/RSSerpent-Rev/rsserpent-plugins.git@5f13e7549843a13baa37dc3a3b09bf437b6305d1",
+]
 plugins = ["rsserpent_plugins.bilibili"]
 ```
 
-Start RSSerpent with that configuration:
-
-```sh
-RSSERPENT_CONFIG=rsserpent.toml uv run --no-sync uvicorn rsserpent_rev:app
-```
+## Official modules
 
 | Plugin | Python module |
 | --- | --- |
