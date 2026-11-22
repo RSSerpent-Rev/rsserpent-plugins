@@ -14,6 +14,7 @@ package = false
 members = ["plugins/*"]
 
 [tool.uv.sources]
+rsserpent-rev = { git = "https://github.com/RSSerpent-Rev/RSSerpent.git", rev = "1da58cea79344b2c1ad881c117d0587dd1e04169" }
 rsserpent-plugin-admob-sdk-update = { workspace = true }
 rsserpent-plugin-applovin-sdk-update = { workspace = true }
 rsserpent-plugin-csj-sdk-update = { workspace = true }
