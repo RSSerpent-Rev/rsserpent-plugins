@@ -1,0 +1,23 @@
+[project]
+name = "rsserpent-official-plugins"
+version = "0.1.0"
+requires-python = ">=3.14,<3.16"
+
+[dependency-groups]
+dev = ["httpx", "httpx2", "pytest>=9,<10", "pytest-asyncio>=1,<2", "uvicorn>=0.29,<1"]
+
+[tool.uv]
+required-version = ">=0.13.9,<0.14"
+package = false
+
+[tool.uv.workspace]
+members = ["plugins/*"]
+
+[tool.uv.sources]
+rsserpent-plugin-admob-sdk-update = { workspace = true }
+rsserpent-plugin-applovin-sdk-update = { workspace = true }
+rsserpent-plugin-csj-sdk-update = { workspace = true }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

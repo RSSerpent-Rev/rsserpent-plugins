@@ -1,0 +1,34 @@
+[project]
+name = "rsserpent-plugin-cocoapods"
+version = "0.2.0"
+description = "An rsserpent plugin for cocoapods."
+requires-python = ">=3.14,<3.16"
+authors = [{ name = "EkkoG", email = "beijiu572@gmail.com" }]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+keywords = ["rss"]
+dependencies = [
+    "feedgen",
+    "feedparser-to-feedgen @ git+https://github.com/EkkoG/feedparser-to-feedgen.git@6f8e2555cdc5e603fcba0f53e4379af98305ef00",
+    "feedparser>=6.0.11,<7",
+    "lxml>=6,<7",
+    "rsserpent-plugin-admob-sdk-update==0.2.0",
+    "rsserpent-plugin-applovin-sdk-update==0.2.0",
+    "rsserpent-plugin-csj-sdk-update==0.2.0",
+    "rsserpent-rev>=0.2,<0.3",
+    "starlette",
+]
+
+[project.urls]
+Repository = "https://github.com/RSSerpent-Rev/rsserpent-plugins"
+
+[project.entry-points."rsserpent.plugin"]
+cocoapods = "rsserpent_plugin_cocoapods:plugin"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""

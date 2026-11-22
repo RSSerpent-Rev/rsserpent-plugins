@@ -1,0 +1,27 @@
+[project]
+name = "rsserpent-plugin-bilibili"
+version = "0.2.0"
+description = "An rsserpent plugin for bilibili.com."
+requires-python = ">=3.14,<3.16"
+authors = [{ name = "creedowl", email = "creedowl@gmail.com" }]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+keywords = ["rss"]
+dependencies = [
+    "arrow",
+    "rsserpent-rev>=0.2,<0.3",
+]
+
+[project.urls]
+Repository = "https://github.com/RSSerpent-Rev/rsserpent-plugins"
+
+[project.entry-points."rsserpent.plugin"]
+bilibili = "rsserpent_plugin_bilibili:plugin"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""

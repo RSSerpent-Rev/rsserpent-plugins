@@ -1,0 +1,28 @@
+[project]
+name = "rsserpent-plugin-pubdev"
+version = "0.2.0"
+description = "An RSSerpent plugin for package updates from pub.dev."
+requires-python = ">=3.14,<3.16"
+authors = [{ name = "EkkoG", email = "beijiu572@gmail.com" }]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+keywords = ["rss"]
+dependencies = [
+    "arrow",
+    "lxml>=6,<7",
+    "rsserpent-rev>=0.2,<0.3",
+]
+
+[project.urls]
+Repository = "https://github.com/RSSerpent-Rev/rsserpent-plugins"
+
+[project.entry-points."rsserpent.plugin"]
+pubdev = "rsserpent_plugin_pubdev:plugin"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""

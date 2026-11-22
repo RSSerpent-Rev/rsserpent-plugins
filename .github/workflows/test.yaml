@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yaml'
+      - '.python-version'
+      - 'plugins/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/test.yaml'
+      - '.python-version'
+      - 'plugins/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.14', '3.15']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.13.9'
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - run: uv sync --locked --all-packages
+      - run: uv run --no-sync sh scripts/test.sh
+      - run: uv build --all-packages
