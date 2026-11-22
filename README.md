@@ -1,32 +1,56 @@
 # RSSerpent official plugins
 
-The RSSerpent-Rev organization maintains these ten plugins in one uv workspace. Each directory in `plugins/` builds a separate package with its original distribution name, Python module, and subscription routes. See [Sources](SOURCES.md) for the original commits and licenses.
+One Python package provides all ten official RSSerpent plugins. Each subpackage of `rsserpent_plugins` exports a `plugin` object. See [Sources](SOURCES.md) for the original repositories and licenses.
 
-## Install a plugin
+## Install and enable plugins
 
-Use uv 0.13.9 and CPython 3.14 or 3.15. Install the core and the plugin in the same environment. Replace `<commit>` with the full commit of the published plugin repository.
+Use CPython 3.14 or 3.15 and RSSerpent 0.3 or later with the module configuration loader. Install the official plugin wheel in the same environment as the core:
 
 ```sh
-uv venv --python 3.14
-uv pip install 'rsserpent-rev @ git+https://github.com/RSSerpent-Rev/RSSerpent.git@1da58cea79344b2c1ad881c117d0587dd1e04169' uvicorn \
-  'rsserpent-plugin-bilibili @ git+https://github.com/RSSerpent-Rev/rsserpent-plugins.git@<commit>#subdirectory=plugins/bilibili'
-.venv/bin/uvicorn rsserpent_rev:app
+uv pip install /path/to/rsserpent_plugins-0.3.0-py3-none-any.whl
 ```
 
-For CocoaPods, use `rsserpent-plugin-cocoapods` and `plugins/cocoapods`. uv installs AdMob, AppLovin, and CSJ from the same commit. To install the CocoaPods wheel, give uv the matching core and SDK wheels with `--find-links`. Update a Git installation by replacing the old commit in your requirements and rebuilding or resyncing the environment.
+To install from Git, use a full commit that contains the aggregate package:
 
-The core reads the installed `rsserpent.plugin` entry points when it creates the app. This also lets it load independent plugins such as CAA, Douban, Manhuagui, and Zhubai. The RSS Proxy requires explicit sources in `RSSERPENT_PROXY_SOURCES`. See its [configuration](plugins/rss-proxy/README.md).
+```sh
+uv pip install 'rsserpent-plugins @ git+https://github.com/RSSerpent-Rev/rsserpent-plugins.git@<commit>'
+```
+
+List the plugins to enable in `rsserpent.toml`:
+
+```toml
+plugins = ["rsserpent_plugins.bilibili"]
+```
+
+Start RSSerpent with that configuration:
+
+```sh
+RSSERPENT_CONFIG=rsserpent.toml uv run --no-sync uvicorn rsserpent_rev:app
+```
+
+| Plugin | Python module |
+| --- | --- |
+| AdMob SDK Update | `rsserpent_plugins.admob_sdk_update` |
+| Apple Newsroom | `rsserpent_plugins.apple_newsroom` |
+| Apple Upcoming Requirements | `rsserpent_plugins.apple_upcoming_requirements` |
+| AppLovin SDK Update | `rsserpent_plugins.applovin_sdk_update` |
+| Bilibili | `rsserpent_plugins.bilibili` |
+| CocoaPods | `rsserpent_plugins.cocoapods` |
+| CSJ SDK Update | `rsserpent_plugins.csj_sdk_update` |
+| PubDev | `rsserpent_plugins.pubdev` |
+| RSS Proxy | `rsserpent_plugins.rss_proxy` |
+| Slackware News | `rsserpent_plugins.slackware_news` |
+
+CocoaPods uses the three SDK providers for its own feeds. To enable the SDKs' separate subscriptions, also list their modules. RSS Proxy also requires `RSSERPENT_PROXY_SOURCES`. See [RSS Proxy configuration](rsserpent_plugins/rss_proxy/README.md).
+
+You can install independently published Python plugins from wheels, Git or PyPI. Add each plugin's importable module name to the same list. The module must export a `plugin` instance of `rsserpent_rev.models.Plugin`.
 
 ## Develop and test
 
-Sync all ten packages with the checked-in lock and run the workspace tests and builds:
-
 ```sh
-uv sync --locked --all-packages
-uv run --no-sync sh scripts/test.sh
-uv build --all-packages
+uv sync --locked
+uv run --no-sync pytest
+uv build
 ```
 
-The test script starts a separate pytest process for each plugin. The default tests use fixed responses and can run without contacting the upstream services.
-
-To update the core, change its full commit in `[tool.uv.sources]` and in the install example. Run `uv lock` and run the test commands on both supported Python versions before you commit the lock.
+The lock pins a public core commit for the provider API tests. To test the app with module configuration, install the built plugin wheel in an environment with RSSerpent 0.3. See the [RSSerpent deployment guide](https://github.com/RSSerpent-Rev/RSSerpent/blob/main/docs/deployment/plugin.md).

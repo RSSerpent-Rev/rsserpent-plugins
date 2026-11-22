@@ -2,21 +2,6 @@ version = 1
 revision = 5
 requires-python = ">=3.14, <3.16"
 
-[manifest]
-members = [
-    "rsserpent-official-plugins",
-    "rsserpent-plugin-admob-sdk-update",
-    "rsserpent-plugin-apple-newsroom",
-    "rsserpent-plugin-apple-upcoming-requirements",
-    "rsserpent-plugin-applovin-sdk-update",
-    "rsserpent-plugin-bilibili",
-    "rsserpent-plugin-cocoapods",
-    "rsserpent-plugin-csj-sdk-update",
-    "rsserpent-plugin-pubdev",
-    "rsserpent-plugin-rss-proxy",
-    "rsserpent-plugin-slackware-news",
-]
-
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"
@@ -1061,9 +1046,20 @@ wheels = [
 ]
 
 [[package]]
-name = "rsserpent-official-plugins"
-version = "0.1.0"
-source = { virtual = "." }
+name = "rsserpent-plugins"
+version = "0.3.0"
+source = { editable = "." }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "arrow" },
+    { name = "feedgen" },
+    { name = "feedparser" },
+    { name = "feedparser-to-feedgen" },
+    { name = "lxml" },
+    { name = "rsserpent-rev" },
+    { name = "starlette" },
+    { name = "yarl" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -1075,6 +1071,17 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [
+    { name = "aiohttp", specifier = ">=3.14.5,<4" },
+    { name = "arrow" },
+    { name = "feedgen" },
+    { name = "feedparser", specifier = ">=6.0.11,<7" },
+    { name = "feedparser-to-feedgen", git = "https://github.com/EkkoG/feedparser-to-feedgen.git?rev=6f8e2555cdc5e603fcba0f53e4379af98305ef00" },
+    { name = "lxml", specifier = ">=6,<7" },
+    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
+    { name = "starlette" },
+    { name = "yarl" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1083,188 +1090,6 @@ dev = [
     { name = "pytest", specifier = ">=9,<10" },
     { name = "pytest-asyncio", specifier = ">=1,<2" },
     { name = "uvicorn", specifier = ">=0.29,<1" },
-]
-
-[[package]]
-name = "rsserpent-plugin-admob-sdk-update"
-version = "0.2.0"
-source = { editable = "plugins/admob-sdk-update" }
-dependencies = [
-    { name = "arrow" },
-    { name = "lxml" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-apple-newsroom"
-version = "0.2.0"
-source = { editable = "plugins/apple-newsroom" }
-dependencies = [
-    { name = "arrow" },
-    { name = "feedgen" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "feedgen" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-apple-upcoming-requirements"
-version = "0.2.0"
-source = { editable = "plugins/apple-upcoming-requirements" }
-dependencies = [
-    { name = "arrow" },
-    { name = "lxml" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-applovin-sdk-update"
-version = "0.2.0"
-source = { editable = "plugins/applovin-sdk-update" }
-dependencies = [
-    { name = "arrow" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-bilibili"
-version = "0.2.0"
-source = { editable = "plugins/bilibili" }
-dependencies = [
-    { name = "arrow" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-cocoapods"
-version = "0.2.0"
-source = { editable = "plugins/cocoapods" }
-dependencies = [
-    { name = "feedgen" },
-    { name = "feedparser" },
-    { name = "feedparser-to-feedgen" },
-    { name = "lxml" },
-    { name = "rsserpent-plugin-admob-sdk-update" },
-    { name = "rsserpent-plugin-applovin-sdk-update" },
-    { name = "rsserpent-plugin-csj-sdk-update" },
-    { name = "rsserpent-rev" },
-    { name = "starlette" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "feedgen" },
-    { name = "feedparser", specifier = ">=6.0.11,<7" },
-    { name = "feedparser-to-feedgen", git = "https://github.com/EkkoG/feedparser-to-feedgen.git?rev=6f8e2555cdc5e603fcba0f53e4379af98305ef00" },
-    { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-plugin-admob-sdk-update", editable = "plugins/admob-sdk-update" },
-    { name = "rsserpent-plugin-applovin-sdk-update", editable = "plugins/applovin-sdk-update" },
-    { name = "rsserpent-plugin-csj-sdk-update", editable = "plugins/csj-sdk-update" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-    { name = "starlette" },
-]
-
-[[package]]
-name = "rsserpent-plugin-csj-sdk-update"
-version = "0.2.0"
-source = { editable = "plugins/csj-sdk-update" }
-dependencies = [
-    { name = "arrow" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-pubdev"
-version = "0.2.0"
-source = { editable = "plugins/pubdev" }
-dependencies = [
-    { name = "arrow" },
-    { name = "lxml" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-]
-
-[[package]]
-name = "rsserpent-plugin-rss-proxy"
-version = "0.2.0"
-source = { editable = "plugins/rss-proxy" }
-dependencies = [
-    { name = "aiohttp" },
-    { name = "feedparser" },
-    { name = "feedparser-to-feedgen" },
-    { name = "rsserpent-rev" },
-    { name = "starlette" },
-    { name = "yarl" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiohttp", specifier = ">=3.14.5,<4" },
-    { name = "feedparser", specifier = ">=6.0.11,<7" },
-    { name = "feedparser-to-feedgen", git = "https://github.com/EkkoG/feedparser-to-feedgen.git?rev=6f8e2555cdc5e603fcba0f53e4379af98305ef00" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
-    { name = "starlette" },
-    { name = "yarl" },
-]
-
-[[package]]
-name = "rsserpent-plugin-slackware-news"
-version = "0.2.0"
-source = { editable = "plugins/slackware-news" }
-dependencies = [
-    { name = "arrow" },
-    { name = "lxml" },
-    { name = "rsserpent-rev" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arrow" },
-    { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
 ]
 
 [[package]]
