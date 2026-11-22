@@ -22,7 +22,14 @@ dependencies = [
 Repository = "https://github.com/RSSerpent-Rev/rsserpent-plugins"
 
 [dependency-groups]
-dev = ["httpx", "httpx2", "pytest>=9,<10", "pytest-asyncio>=1,<2", "uvicorn>=0.29,<1"]
+dev = [
+    "httpx",
+    "httpx2",
+    "pytest>=9,<10",
+    "pytest-asyncio>=1,<2",
+    "rsserpent-rev @ git+https://github.com/RSSerpent-Rev/RSSerpent.git@1da58cea79344b2c1ad881c117d0587dd1e04169",
+    "uvicorn>=0.29,<1",
+]
 
 [build-system]
 requires = ["uv_build>=0.13.9,<0.14"]
@@ -34,9 +41,6 @@ required-version = ">=0.13.9,<0.14"
 [tool.uv.build-backend]
 module-root = ""
 source-exclude = ["**/.DS_Store"]
-
-[tool.uv.sources]
-rsserpent-rev = { git = "https://github.com/RSSerpent-Rev/RSSerpent.git", rev = "1da58cea79344b2c1ad881c117d0587dd1e04169" }
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"

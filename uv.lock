@@ -1067,6 +1067,7 @@ dev = [
     { name = "httpx2" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "rsserpent-rev" },
     { name = "uvicorn" },
 ]
 
@@ -1078,7 +1079,7 @@ requires-dist = [
     { name = "feedparser", specifier = ">=6.0.11,<7" },
     { name = "feedparser-to-feedgen", git = "https://github.com/EkkoG/feedparser-to-feedgen.git?rev=6f8e2555cdc5e603fcba0f53e4379af98305ef00" },
     { name = "lxml", specifier = ">=6,<7" },
-    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
+    { name = "rsserpent-rev", specifier = ">=0.2,<0.4" },
     { name = "starlette" },
     { name = "yarl" },
 ]
@@ -1089,6 +1090,7 @@ dev = [
     { name = "httpx2" },
     { name = "pytest", specifier = ">=9,<10" },
     { name = "pytest-asyncio", specifier = ">=1,<2" },
+    { name = "rsserpent-rev", git = "https://github.com/RSSerpent-Rev/RSSerpent.git?rev=1da58cea79344b2c1ad881c117d0587dd1e04169" },
     { name = "uvicorn", specifier = ">=0.29,<1" },
 ]
 
