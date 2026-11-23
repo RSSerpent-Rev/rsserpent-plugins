@@ -11,7 +11,7 @@ path = "/pubdev/update/{package}"
 
 
 class Parameters(BaseModel):
-    package: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
+    package: str = Field(pattern=r"^[a-z_][a-z0-9_]*$")
 
 
 @cached

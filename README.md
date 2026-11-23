@@ -13,7 +13,7 @@ plugin_requirements = [
 plugins = ["rsserpent_plugins.bilibili"]
 ```
 
-Replace `PLUGIN_COMMIT` with the full commit SHA of the plugin version you want to install. The plugins use the typed provider API from RSSerpent 0.3.
+Replace `PLUGIN_COMMIT` with the full commit SHA of the plugin version you want to install. The plugins use the typed provider API from RSSerpent 0.3. Feed readers may show some older entries again after the upgrade. Apple Newsroom now uses absolute article URLs for entry IDs.
 
 ## Official modules
 
