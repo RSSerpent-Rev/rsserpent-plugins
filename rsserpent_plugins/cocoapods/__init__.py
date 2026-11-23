@@ -14,4 +14,13 @@ plugin = Plugin(
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-cocoapods",
     routers={route.path: route.provider},
     lifespan=lambda: HTTPClient(trust_env=False),
+    route_docs={
+        route.path: {
+            "summary": "Releases of a CocoaPods package",
+            "parameters": {"pod": "Exact pod name, including its letter case."},
+            "examples": [
+                {"label": "Google Mobile Ads SDK", "path": {"pod": "Google-Mobile-Ads-SDK"}},
+            ],
+        },
+    },
 )

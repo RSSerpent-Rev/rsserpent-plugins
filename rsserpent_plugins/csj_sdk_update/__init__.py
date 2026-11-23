@@ -12,4 +12,14 @@ plugin = Plugin(
     prefix="/csj-sdk-update",
     repository="https://github.com/rsserpent-rev/rsserpent-plugin-csj-sdk-update",
     routers={route.path: route.provider},
+    route_docs={
+        route.path: {
+            "summary": "CSJ SDK release notes",
+            "description": "The instance operator must set CSJ_SID_GUARD to access the CSJ release notes.",
+            "parameters": {"platform": "Numeric SDK release log ID from the CSJ site."},
+            "examples": [
+                {"label": "Ads-CN Beta", "path": {"platform": "197"}},
+            ],
+        },
+    },
 )

@@ -14,4 +14,10 @@ plugin = Plugin(
     routers={route.path: route.provider},
     enabled=route.enabled,
     lifespan=route.lifespan,
+    route_docs={
+        route.path: {
+            "summary": "Proxy an allowed RSS or Atom source",
+            "parameters": {"url": "Complete feed URL. The instance must allow this exact source."},
+        },
+    },
 )

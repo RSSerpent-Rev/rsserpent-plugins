@@ -12,4 +12,7 @@ plugin = Plugin(
     prefix="/apple-upcoming-requirements",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-apple-upcoming-requirements",
     routers={route.path: route.provider},
+    route_docs={
+        route.path: {"summary": "Upcoming requirements for Apple developers"},
+    },
 )

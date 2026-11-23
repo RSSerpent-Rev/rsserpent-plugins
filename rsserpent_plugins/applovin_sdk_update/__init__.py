@@ -12,4 +12,13 @@ plugin = Plugin(
     prefix="/applovin/sdk-update",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-applovin",
     routers={route.path: route.provider},
+    route_docs={
+        route.path: {
+            "summary": "AppLovin MAX SDK release notes",
+            "parameters": {"platform": "SDK platform: ios, android, unity, react-native, flutter or godot."},
+            "examples": [
+                {"label": "Android", "path": {"platform": "android"}},
+            ],
+        },
+    },
 )

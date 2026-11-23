@@ -12,4 +12,14 @@ plugin = Plugin(
     prefix="/admob/sdk-update",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-admob-sdk-update",
     routers={route.path: route.provider},
+    route_docs={
+        route.path: {
+            "summary": "AdMob SDK release notes",
+            "parameters": {"platform": "SDK platform: ios, android or cpp."},
+            "examples": [
+                {"label": "iOS", "path": {"platform": "ios"}},
+                {"label": "Android", "path": {"platform": "android"}},
+            ],
+        },
+    },
 )

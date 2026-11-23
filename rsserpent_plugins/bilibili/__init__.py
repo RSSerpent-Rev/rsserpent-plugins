@@ -17,4 +17,28 @@ plugin = Plugin(
         user.cinema.path: user.cinema.provider,
         app.update.path: app.update.provider,
     },
+    route_docs={
+        user.video.path: {
+            "summary": "Videos from a Bilibili user",
+            "parameters": {"uid": "Numeric user ID from the Bilibili profile URL."},
+            "examples": [
+                {"label": "Example user", "path": {"uid": "297786973"}},
+            ],
+        },
+        user.bangumi.path: {
+            "summary": "Bilibili series followed by a user",
+            "parameters": {"uid": "Numeric user ID from the Bilibili profile URL."},
+        },
+        user.cinema.path: {
+            "summary": "Bilibili shows followed by a user",
+            "parameters": {"uid": "Numeric user ID from the Bilibili profile URL."},
+        },
+        app.update.path: {
+            "summary": "Bilibili app releases",
+            "parameters": {"platform": "Bilibili app platform code, such as android."},
+            "examples": [
+                {"label": "Android app", "path": {"platform": "android"}},
+            ],
+        },
+    },
 )

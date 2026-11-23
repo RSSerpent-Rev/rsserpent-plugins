@@ -12,4 +12,7 @@ plugin = Plugin(
     prefix="/apple-newsroom",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-apple-newsroom",
     routers={route.path: route.provider},
+    route_docs={
+        route.path: {"summary": "Apple Newsroom announcements"},
+    },
 )

@@ -14,4 +14,13 @@ plugin = Plugin(
     routers={
         route.path: route.provider,
     },
+    route_docs={
+        route.path: {
+            "summary": "Versions of a pub.dev package",
+            "parameters": {"package": "Package name from its pub.dev page."},
+            "examples": [
+                {"label": "http package", "path": {"package": "http"}},
+            ],
+        },
+    },
 )
