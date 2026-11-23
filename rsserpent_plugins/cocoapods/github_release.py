@@ -1,15 +1,10 @@
 import asyncio
 import re
-from io import BytesIO
 from urllib.parse import quote, urlsplit
 
-import feedparser
+import httpx
 from feedgen.feed import FeedGenerator
-from feedparser_to_feedgen import to_feedgen
-from lxml import html
-from lxml.etree import ParserError, XMLSyntaxError
-from rsserpent_rev.utils import HTTPClient
-from starlette.exceptions import HTTPException
+from rsserpent_rev.utils import HTTPClient, parse_feed
 
 REPOSITORY = re.compile(r"/([a-zA-Z0-9-]+)/([a-zA-Z0-9_.-]+)/?")
 
@@ -42,36 +37,21 @@ async def get_feed(client: HTTPClient, url: str) -> FeedGenerator | None:
         return None
     response.raise_for_status()
     feed = await asyncio.to_thread(
-        feedparser.parse, BytesIO(response.content), response_headers={"content-location": url}
+        parse_feed, response.content, base_url=str(response.url)
     )
-    if not feed.version or not feed.feed.get("title"):
-        raise HTTPException(502, "Upstream response is not a feed")
-    if not feed.entries:
-        return None
-    feed.feed["link"] = feed.feed.get("link") or url
-    feed.feed["description"] = feed.feed.get("description") or feed.feed.title
-    for entry in feed.entries:
-        if "summary" not in entry and entry.get("content"):
-            entry["summary"] = entry.content[0].value
-    try:
-        return to_feedgen(feed)
-    except (AttributeError, TypeError, ValueError) as exception:
-        raise HTTPException(502, "Upstream feed has invalid metadata") from exception
+    return feed if feed.entry() else None
 
 
 async def get_changelog(client: HTTPClient, pod: str) -> FeedGenerator | None:
-    response = await client.get(f"https://cocoapods.org/pods/{quote(pod, safe='')}")
-    if response.status_code == 404:
-        return None
-    response.raise_for_status()
+    url = f"https://cocoapods.org/pods/{quote(pod, safe='')}"
     try:
-        tree = html.fromstring(response.content)
-    except (ParserError, XMLSyntaxError) as exception:
-        raise HTTPException(502, "Upstream response is not a pod page") from exception
-    for link in tree.xpath(
-        "//ul[contains(concat(' ', normalize-space(@class), ' '), ' links ')]//a/@href"
-    ):
-        repository = repository_url(link)
+        page = await client.get_html(url)
+    except httpx.HTTPStatusError as exception:
+        if exception.response.status_code == 404:
+            return None
+        raise
+    for link in page("ul.links a[href]").items():
+        repository = repository_url(link.attr("href"))
         if repository is not None:
             return await get_feed(client, repository + "/releases.atom")
     return None

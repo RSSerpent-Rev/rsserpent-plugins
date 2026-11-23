@@ -1,73 +1,56 @@
-from typing import Any
+from datetime import datetime
+from typing import Annotated, Literal
 
 import arrow
 from lxml import html
-from rsserpent_rev.utils import HTTPClient, cached
+from pydantic import BaseModel, BeforeValidator
+from rsserpent_rev.models import Entry, Feed
+from rsserpent_rev.utils import cached
+
+from .._http import get_client
 
 path = "/admob/sdk-update/{platform}"
+platform_names = {"ios": "iOS", "android": "Android", "cpp": "C++"}
 
 
-def __get_date(date_str: str) -> arrow.Arrow:
-    formats = ["YYYY-MM-DD", "YYYY-M-DD", "MMMM D, YYYY", "YYYY‑MM‑DD"]
-    for fmt in formats:
+class Parameters(BaseModel):
+    platform: Annotated[Literal["ios", "android", "cpp"], BeforeValidator(str.lower)]
+
+
+def release_date(value: str) -> datetime | None:
+    for fmt in ("YYYY-MM-DD", "YYYY-M-DD", "MMMM D, YYYY", "YYYY‑MM‑DD"):
         try:
-            date = arrow.get(date_str.strip(), fmt)
-            break
-        except Exception:
-            date = arrow.now()
-
-    return date
+            return arrow.get(value.strip(), fmt).datetime
+        except arrow.parser.ParserError:
+            continue
+    return None
 
 
 @cached
-async def provider(platform: str) -> dict[str, Any]:
-    """Return three latest AdMob SDK updates.
-
-    Args:
-        platform (str): Platform to get updates for.
-
-    Raises:
-        ValueError: Unsupported platform.
-
-    Returns:
-        Dict[str, Any]: AdMob SDK updates.
-    """
-    map_dict = {
-        "ios": "iOS",
-        "android": "Android",
-        "cpp": "C++",
-    }
-    if platform.lower() not in map_dict:
-        raise ValueError(f"Unsupported platform: {platform}")  # noqa: TRY003
-
-    async with HTTPClient() as client:
-        platform_in_url = platform.replace("-", "_")
-        url = f"https://developers.google.com/admob/{platform_in_url}/rel-notes"
-        html_text = (await client.get(url)).content.decode("utf-8")
-        tree = html.fromstring(html_text)
-        table = tree.xpath("//table")[0]
-
-        items = []
-        for row in table.xpath(".//tr"):
-            if not row.xpath(".//td"):
-                continue
-            version = row.xpath(".//td")[0].text_content()
-            date_str = row.xpath(".//td")[1].text_content().strip()
-            # get html content
-            note = row.xpath(".//td")[2]
-            items.append(
-                {
-                    "title": f"AdMob SDK {map_dict[platform]} {version} Update",
-                    "description": html.tostring(note, encoding="unicode"),
-                    "link": url,
-                    "pub_date": __get_date(date_str),
-                }
+async def provider(platform: str) -> Feed:
+    url = f"https://developers.google.com/admob/{platform}/rel-notes"
+    page = await get_client().get_html(url)
+    label = platform_names[platform]
+    entries = []
+    for row in page("table").eq(0).find("tr").items():
+        cells = row("td")
+        if len(cells) < 3:
+            continue
+        version = cells.eq(0).text()
+        entries.append(
+            Entry(
+                id=f"urn:admob:sdk:{platform}:{version}",
+                title=f"AdMob SDK {label} {version} Update",
+                content=html.tostring(cells[2], encoding="unicode"),
+                content_type="html",
+                link=url,
+                published_at=release_date(cells.eq(1).text()),
             )
-
-    return {
-        "title": f"AdMob SDK {map_dict[platform]} Update",
-        "link": url,
-        "description": "Latest AdMob SDK update.",
-        "pub_date": items[0]["pub_date"],
-        "items": items,
-    }
+        )
+    return Feed(
+        title=f"AdMob SDK {label} Update",
+        link=url,
+        description="Latest AdMob SDK update.",
+        published_at=entries[0].published_at if entries else None,
+        entries=entries,
+    )

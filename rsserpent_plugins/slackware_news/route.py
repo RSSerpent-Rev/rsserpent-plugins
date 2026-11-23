@@ -1,38 +1,39 @@
-from typing import Any
+from urllib.parse import quote
 
 import arrow
-from lxml import html
-from rsserpent_rev.utils import HTTPClient, cached
+from rsserpent_rev.models import Entry, Feed
+from rsserpent_rev.utils import cached
+
+from .._http import get_client
 
 path = "/slackware-news"
+source = "http://www.slackware.com/"
 
 
 @cached
-async def provider() -> dict[str, Any]:
-    """Return the latest news from The Slackware Linux Project.
-
-    Returns:
-        Dict[str, Any]: The Slackware Linux Project news.
-    """
-    async with HTTPClient() as client:
-        response = await client.get("http://www.slackware.com/")
-        tree = html.fromstring(response.content.decode())
-        items = []
-        for table in tree.xpath("//center[not(parent::body)]/table"):
-            title = table.xpath("./tr[1]//b")[0]
-            content = table.xpath("./tr[2]/td[1]")[0]
-            date = table.xpath("normalize-space(./tr[2]/td[2]//b)")
-            items.append(
-                {
-                    "title": title.text_content(),
-                    "description": content.text_content(),
-                    "link": "http://www.slackware.com/",
-                "pub_date": arrow.get(date, "ddd MMM D HH:mm:ss ZZZ YYYY") if date else None,
-                }
+async def provider() -> Feed:
+    page = await get_client().get_html(source)
+    entries = []
+    for table in page("center:not(body > center) > table").items():
+        rows = table("tr")
+        title = rows.eq(0)("b").text()
+        if not title:
+            continue
+        date = rows.eq(1)("td").eq(1)("b").text()
+        entries.append(
+            Entry(
+                id=f"urn:slackware:news:{quote(date or title, safe='')}",
+                title=title,
+                summary=rows.eq(1)("td").eq(0).text() or None,
+                link=source,
+                published_at=arrow.get(date, "ddd MMM D HH:mm:ss ZZZ YYYY").datetime
+                if date
+                else None,
             )
-        return {
-            "title": "The Slackware Linux Project",
-            "link": "http://www.slackware.com/",
-            "description": "The Slackware Linux Project News",
-            "items": items,
-        }
+        )
+    return Feed(
+        title="The Slackware Linux Project",
+        link=source,
+        description="The Slackware Linux Project News",
+        entries=entries,
+    )

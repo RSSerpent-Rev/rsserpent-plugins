@@ -1,4 +1,4 @@
-from rsserpent_rev.models import Persona, Plugin
+from rsserpent_rev.models import FeedRoute, Persona, Plugin
 
 from . import app, user
 
@@ -12,11 +12,12 @@ plugin = Plugin(
     prefix="/bilibili",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-bilibili",
     routers={
-        user.video.path: user.video.provider,
-        user.bangumi.path: user.bangumi.provider,
-        user.cinema.path: user.cinema.provider,
-        app.update.path: app.update.provider,
+        user.video.path: FeedRoute(user.video.provider, user.video.Parameters),
+        user.bangumi.path: FeedRoute(user.bangumi.provider, user.video.Parameters),
+        user.cinema.path: FeedRoute(user.cinema.provider, user.video.Parameters),
+        app.update.path: FeedRoute(app.update.provider, app.update.Parameters),
     },
+    http_client=True,
     route_docs={
         user.video.path: {
             "summary": "Videos from a Bilibili user",

@@ -2,11 +2,12 @@ import hashlib
 from urllib.parse import quote
 
 from feedgen.feed import FeedGenerator
-from rsserpent_rev.models import Feed
+from pydantic import BaseModel, Field
+from rsserpent_rev.models import FeedResult
 from rsserpent_rev.utils import HTTPClient, cached
-from rsserpent_rev.utils import provider as provider_utils
 from starlette.exceptions import HTTPException
 
+from .._http import get_client
 from ..admob_sdk_update import route as admob_sdk_update
 from ..applovin_sdk_update import route as applovin_sdk_update
 from ..csj_sdk_update import route as csj_sdk_update
@@ -15,8 +16,12 @@ from .github_release import get_changelog, get_feed
 path = "/cocoapods/{pod}"
 
 
+class Parameters(BaseModel):
+    pod: str = Field(min_length=1)
+
+
 @cached
-async def provider(pod: str) -> Feed:
+async def provider(pod: str) -> FeedResult:
     if pod == "AppLovinSDK":
         return await applovin_sdk_update.provider("ios")
     if pod == "Google-Mobile-Ads-SDK":
@@ -26,12 +31,7 @@ async def provider(pod: str) -> Feed:
     if pod in {".", ".."}:
         raise HTTPException(400, "Invalid pod name")
 
-    resource = getattr(provider_utils, "provider_resource", None)
-    client = resource.get() if resource is not None else None
-    if isinstance(client, HTTPClient):
-        return await fetch_changelog(client, pod)
-    async with HTTPClient(trust_env=False) as client:
-        return await fetch_changelog(client, pod)
+    return await fetch_changelog(get_client(), pod)
 
 
 async def fetch_changelog(client: HTTPClient, pod: str) -> FeedGenerator:

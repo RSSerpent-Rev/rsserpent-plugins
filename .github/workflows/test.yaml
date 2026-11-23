@@ -41,4 +41,19 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: uv run --no-sync pytest
+      - name: Check official plugin routes
+        env:
+          RSSERPENT_PROXY_SOURCES: "https://example.org/feed.xml"
+        run: |
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          from pkgutil import iter_modules
+
+          import rsserpent_plugins
+
+          packages = sorted(module.name for module in iter_modules(rsserpent_plugins.__path__) if module.ispkg)
+          modules = ", ".join(f'"rsserpent_plugins.{name}"' for name in packages)
+          Path("rsserpent.test.toml").write_text(f"plugins = [{modules}]\n")
+          PY
+          uv run --no-sync rsserpent check --config rsserpent.test.toml
       - run: uv build

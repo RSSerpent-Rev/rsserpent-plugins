@@ -5,4 +5,11 @@
 
 ## Introduction
 
-You must set environment variables `CSJ_SID_GUARD`, the value if the `sid_guard` cookie
+Set the `sid_guard` field from an environment variable in your instance TOML.
+
+```toml
+[plugin_env."rsserpent_plugins.csj_sdk_update"]
+sid_guard = "CSJ_SID_GUARD"
+```
+
+Set `CSJ_SID_GUARD` to the value of the upstream `sid_guard` cookie and pass the variable to the container. If you use the CocoaPods `Ads-CN-Beta` route, add the same mapping under `[plugin_env."rsserpent_plugins.cocoapods"]`.

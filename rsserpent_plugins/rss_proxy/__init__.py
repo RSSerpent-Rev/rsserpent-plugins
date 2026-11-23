@@ -1,4 +1,4 @@
-from rsserpent_rev.models import Persona, Plugin
+from rsserpent_rev.models import FeedRoute, Persona, Plugin
 
 from . import route
 
@@ -11,13 +11,15 @@ plugin = Plugin(
     ),
     prefix="/proxy",
     repository="https://github.com/EkkoG/rsserpent-plugin-rss-proxy",
-    routers={route.path: route.provider},
+    routers={route.path: FeedRoute(route.provider, route.Parameters)},
     enabled=route.enabled,
     lifespan=route.lifespan,
     route_docs={
         route.path: {
             "summary": "Proxy an allowed RSS or Atom source",
-            "parameters": {"url": "Complete feed URL. The instance must allow this exact source."},
+            "parameters": {
+                "url": "Complete feed URL. The instance must allow this exact source."
+            },
         },
     },
 )

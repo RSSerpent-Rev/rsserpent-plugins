@@ -1,48 +1,34 @@
-from typing import Any
+from urllib.parse import urljoin
 
 import arrow
-import lxml
-import lxml.html
+from rsserpent_rev.models import Entry, Feed
+from rsserpent_rev.utils import cached
 
-from rsserpent_rev.utils import HTTPClient, cached
+from .._http import get_client
 
 path = "/apple-upcoming-requirements"
+source = "https://developer.apple.com/news/upcoming-requirements/"
 
 
 @cached
-async def provider() -> dict[str, Any]:
-    async with HTTPClient() as client:
-        resp = await client.get("https://developer.apple.com/news/upcoming-requirements/")
-        html = lxml.html.fromstring(resp.content.decode())
-        # section with class name that contains "article-list"
-        article_list = html.xpath('//section[contains(@class, "article-list")]')[0]
-        items = []
-        for article in article_list.xpath(".//article"):
-            # a tag with class is article-title
-            title = article.xpath('.//a[contains(@class, "article-title")]')[0].text_content().strip()
-            link = (
-                "https://developer.apple.com"
-                + article.xpath('.//a[contains(@class, "article-title")]')[0].attrib["href"]
+async def provider() -> Feed:
+    page = await get_client().get_html(source)
+    entries = []
+    for article in page("section.article-list article").items():
+        title = article("a.article-title")
+        if not title or not (href := title.attr("href")):
+            continue
+        date = article("p.article-date").text().partition(" ")[2]
+        entries.append(
+            Entry(
+                title=title.text(),
+                link=urljoin(source, href),
+                summary=article("span.article-text").text() or None,
+                published_at=arrow.get(date, "MMMM D, YYYY").datetime if date else None,
             )
-            # span tag with class is article-text
-            description = article.xpath('.//span[contains(@class, "article-text")]')[0].text_content().strip()
-            # p tag with class article-date
-            article_date = " ".join(
-                article.xpath('.//p[contains(@class, "article-date")]')[0].text_content().split(" ")[1:]
-            )
-            article_date = arrow.get(article_date, "MMMM D, YYYY")
-
-            items.append(
-                {
-                    "title": title,
-                    "link": link,
-                    "description": description,
-                    "pub_date": article_date,
-                }
-            )
-    return {
-        "title": "Apple developer news - Upcoming requirements",
-        "link": "https://developer.apple.com/news/upcoming-requirements/",
-        "description": "Apple developer news - Upcoming requirements",
-        "items": items,
-    }
+        )
+    return Feed(
+        title="Apple developer news - Upcoming requirements",
+        link=source,
+        entries=entries,
+    )

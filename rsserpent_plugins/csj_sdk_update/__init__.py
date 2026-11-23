@@ -1,4 +1,4 @@
-from rsserpent_rev.models import Persona, Plugin
+from rsserpent_rev.models import FeedRoute, Persona, Plugin
 
 from . import route
 
@@ -11,11 +11,13 @@ plugin = Plugin(
     ),
     prefix="/csj-sdk-update",
     repository="https://github.com/rsserpent-rev/rsserpent-plugin-csj-sdk-update",
-    routers={route.path: route.provider},
+    routers={route.path: FeedRoute(route.provider, route.Parameters)},
+    http_client=True,
+    settings_model=route.Settings,
     route_docs={
         route.path: {
             "summary": "CSJ SDK release notes",
-            "description": "The instance operator must set CSJ_SID_GUARD to access the CSJ release notes.",
+            "description": "The instance can configure the CSJ session cookie to access the release notes.",
             "parameters": {"platform": "Numeric SDK release log ID from the CSJ site."},
             "examples": [
                 {"label": "Ads-CN Beta", "path": {"platform": "197"}},

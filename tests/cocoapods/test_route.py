@@ -1,13 +1,13 @@
 import asyncio
-from io import BytesIO
 from xml.etree import ElementTree
 
 import httpx
 import pytest
-from rsserpent_rev.main import RSS_MIMETYPE, create_app
+from rsserpent_rev.main import RSS_MIMETYPE
+from rsserpent_rev.models import Entry, Feed
+from rsserpent_rev.testing import plugin_test_client
 from rsserpent_rev.utils import HTTPClient
 from rsserpent_rev.utils.cache import get_cache
-from starlette.testclient import TestClient
 
 from rsserpent_plugins.cocoapods import github_release, plugin, route
 
@@ -27,24 +27,28 @@ def clear_provider_cache():
 
 def test_releases_and_specs_fallback_share_client(monkeypatch):
     requests = []
-    parse_feed = github_release.feedparser.parse
+    parse_feed = github_release.parse_feed
 
     def parse(source, **kwargs):
-        assert isinstance(source, BytesIO)
+        assert isinstance(source, bytes)
         return parse_feed(source, **kwargs)
 
-    monkeypatch.setattr(github_release.feedparser, "parse", parse)
+    monkeypatch.setattr(github_release, "parse_feed", parse)
 
     async def get(client, url):
         requests.append((client, url))
         content = FEED
         if url.startswith("https://cocoapods.org/"):
-            repo = "https://github.com/example/project" if url.endswith("/Project") else "https://example.org/project"
+            repo = (
+                "https://github.com/example/project"
+                if url.endswith("/Project")
+                else "https://example.org/project"
+            )
             content = f'<ul class="links"><li><a href="{repo}">Repository</a></li></ul>'.encode()
         return httpx.Response(200, content=content, request=httpx.Request("GET", url))
 
     monkeypatch.setattr(HTTPClient, "get", get)
-    with TestClient(create_app([plugin])) as client:
+    with plugin_test_client(plugin) as client:
         for name in ("Project", "OtherProject"):
             response = client.get(f"/cocoapods/{name}")
             assert response.status_code == 200
@@ -59,18 +63,20 @@ def test_releases_and_specs_fallback_share_client(monkeypatch):
     assert requests[0][0].is_closed
 
 
-@pytest.mark.parametrize(("upstream_status", "result"), [(404, 404), (503, 502), (200, 502)])
+@pytest.mark.parametrize(
+    ("upstream_status", "result"), [(404, 404), (503, 502), (200, 502)]
+)
 def test_missing_or_unavailable_pod(monkeypatch, upstream_status, result):
     async def get(client, url):
         return httpx.Response(upstream_status, request=httpx.Request("GET", url))
 
     monkeypatch.setattr(HTTPClient, "get", get)
-    with TestClient(create_app([plugin])) as client:
+    with plugin_test_client(plugin) as client:
         assert client.get("/cocoapods/Project").status_code == result
 
 
 @pytest.mark.asyncio
-async def test_pending_specs_request_keeps_service_responsive(monkeypatch):
+async def test_pending_specs_request_keeps_service_responsive(monkeypatch, asgi_client):
     entered = asyncio.Event()
     release = asyncio.Event()
 
@@ -83,12 +89,13 @@ async def test_pending_specs_request_keeps_service_responsive(monkeypatch):
         return httpx.Response(200, content=FEED, request=request)
 
     monkeypatch.setattr(HTTPClient, "get", get)
-    transport = httpx.ASGITransport(app=create_app([plugin]))
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with asgi_client(plugin) as client:
         fetching = asyncio.create_task(client.get("/cocoapods/Project"))
         try:
             await asyncio.wait_for(entered.wait(), timeout=2)
-            assert (await asyncio.wait_for(client.get("/"), timeout=2)).status_code == 200
+            assert (
+                await asyncio.wait_for(client.get("/"), timeout=2)
+            ).status_code == 200
             assert not fetching.done()
         finally:
             release.set()
@@ -107,18 +114,24 @@ async def test_pending_specs_request_keeps_service_responsive(monkeypatch):
 def test_sdk_dispatch(monkeypatch, pod, sdk_module, platform):
     async def get_feed(requested_platform):
         assert requested_platform == platform
-        return {
-            "title": "SDK release",
-            "link": "https://example.org",
-            "description": "Release notes",
-            "items": [{"title": "Version 1"}],
-        }
+        return Feed(
+            title="SDK release",
+            link="https://example.org",
+            description="Release notes",
+            entries=[Entry(title="Version 1")],
+        )
 
     monkeypatch.setattr(sdk_module, "provider", get_feed)
-    with TestClient(create_app([plugin])) as client:
+    with plugin_test_client(plugin) as client:
         rss = client.get(f"/cocoapods/{pod}.rss")
         assert rss.status_code == 200
-        assert ElementTree.fromstring(rss.content).findtext("./channel/title") == "SDK release"
+        assert (
+            ElementTree.fromstring(rss.content).findtext("./channel/title")
+            == "SDK release"
+        )
         atom = client.get(f"/cocoapods/{pod}.atom")
         assert atom.status_code == 200
-        assert ElementTree.fromstring(atom.content).tag == "{http://www.w3.org/2005/Atom}feed"
+        assert (
+            ElementTree.fromstring(atom.content).tag
+            == "{http://www.w3.org/2005/Atom}feed"
+        )

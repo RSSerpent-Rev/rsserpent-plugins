@@ -1,12 +1,10 @@
 import asyncio
 from contextlib import asynccontextmanager
-from io import BytesIO
 from types import SimpleNamespace
 from urllib.parse import quote
 from xml.etree import ElementTree
 
 import aiohttp
-import httpx
 import pytest
 from aiohttp.resolver import ThreadedResolver
 from rsserpent_rev.main import ATOM_MIMETYPE, RSS_MIMETYPE, create_app
@@ -44,13 +42,13 @@ def test_disabled_by_default(monkeypatch):
 def test_rss_and_atom_use_the_lifespan_client(monkeypatch):
     monkeypatch.setenv("RSSERPENT_PROXY_SOURCES", SOURCE)
     calls = []
-    parse_feed = route.feedparser.parse
+    parse_feed = route.parse_feed
 
     def parse(source, **kwargs):
-        assert isinstance(source, BytesIO)
+        assert isinstance(source, bytes)
         return parse_feed(source, **kwargs)
 
-    monkeypatch.setattr(route.feedparser, "parse", parse)
+    monkeypatch.setattr(route, "parse_feed", parse)
 
     @asynccontextmanager
     async def get(client, url, *, allow_redirects):
@@ -75,8 +73,13 @@ def test_rss_and_atom_use_the_lifespan_client(monkeypatch):
     assert rss.status_code == atom.status_code == 200
     assert rss.headers["Content-Type"] == RSS_MIMETYPE
     assert atom.headers["Content-Type"] == ATOM_MIMETYPE
-    assert ElementTree.fromstring(rss.content).findtext("./channel/title") == "Example news"
-    assert ElementTree.fromstring(atom.content).tag == "{http://www.w3.org/2005/Atom}feed"
+    assert (
+        ElementTree.fromstring(rss.content).findtext("./channel/title")
+        == "Example news"
+    )
+    assert (
+        ElementTree.fromstring(atom.content).tag == "{http://www.w3.org/2005/Atom}feed"
+    )
     assert denied.status_code == 403
     assert [url for _, url in calls] == [SOURCE, SOURCE]
     assert calls[0][0] is calls[1][0]
@@ -110,7 +113,7 @@ def test_upstream_timeout_returns_gateway_timeout(monkeypatch):
     monkeypatch.setenv("RSSERPENT_PROXY_SOURCES", SOURCE)
 
     def get(client, url, *, allow_redirects):
-        raise asyncio.TimeoutError
+        raise TimeoutError
 
     monkeypatch.setattr(aiohttp.ClientSession, "get", get)
     with TestClient(create_app([plugin])) as client:
@@ -158,7 +161,9 @@ async def test_resolver_rejects_nonpublic_addresses(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_pending_download_keeps_other_requests_responsive(monkeypatch):
+async def test_pending_download_keeps_other_requests_responsive(
+    monkeypatch, asgi_client
+):
     monkeypatch.setenv("RSSERPENT_PROXY_SOURCES", SOURCE)
     entered = asyncio.Event()
     release = asyncio.Event()
@@ -175,12 +180,13 @@ async def test_pending_download_keeps_other_requests_responsive(monkeypatch):
         )
 
     monkeypatch.setattr(aiohttp.ClientSession, "get", get)
-    app = create_app([plugin])
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+    async with asgi_client(plugin) as client:
         fetching = asyncio.create_task(client.get(PATH))
         try:
             await asyncio.wait_for(entered.wait(), timeout=2)
-            assert (await asyncio.wait_for(client.get("/"), timeout=2)).status_code == 200
+            assert (
+                await asyncio.wait_for(client.get("/"), timeout=2)
+            ).status_code == 200
             assert not fetching.done()
         finally:
             release.set()

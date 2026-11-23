@@ -10,10 +10,10 @@ dependencies = [
     "aiohttp>=3.14.5,<4",
     "arrow",
     "feedgen",
-    "feedparser>=6.0.11,<7",
-    "feedparser-to-feedgen @ git+https://github.com/EkkoG/feedparser-to-feedgen.git@6f8e2555cdc5e603fcba0f53e4379af98305ef00",
+    "httpx>=0.28,<1",
     "lxml>=6,<7",
-    "rsserpent-rev>=0.2,<0.4",
+    "pydantic>=2.12,<3",
+    "rsserpent-rev>=0.3,<0.4",
     "starlette",
     "yarl",
 ]
@@ -23,11 +23,10 @@ Repository = "https://github.com/RSSerpent-Rev/rsserpent-plugins"
 
 [dependency-groups]
 dev = [
-    "httpx",
     "httpx2",
     "pytest>=9,<10",
     "pytest-asyncio>=1,<2",
-    "rsserpent-rev @ git+https://github.com/RSSerpent-Rev/RSSerpent.git@1da58cea79344b2c1ad881c117d0587dd1e04169",
+    "rsserpent-rev @ git+https://github.com/RSSerpent-Rev/RSSerpent.git@9e42e56855aa180bfeb5ad2f271d795e668e13f8",
     "uvicorn>=0.29,<1",
 ]
 

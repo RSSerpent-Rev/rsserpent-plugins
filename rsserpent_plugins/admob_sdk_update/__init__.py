@@ -1,4 +1,4 @@
-from rsserpent_rev.models import Persona, Plugin
+from rsserpent_rev.models import FeedRoute, Persona, Plugin
 
 from . import route
 
@@ -11,7 +11,8 @@ plugin = Plugin(
     ),
     prefix="/admob/sdk-update",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-admob-sdk-update",
-    routers={route.path: route.provider},
+    routers={route.path: FeedRoute(route.provider, route.Parameters)},
+    http_client=True,
     route_docs={
         route.path: {
             "summary": "AdMob SDK release notes",

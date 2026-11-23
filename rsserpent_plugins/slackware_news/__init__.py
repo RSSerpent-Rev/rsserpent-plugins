@@ -12,6 +12,7 @@ plugin = Plugin(
     prefix="/slackware-news",
     repository="https://github.com/EkkoG/rsserpent-plugin-slackware-news",
     routers={route.path: route.provider},
+    http_client=True,
     route_docs={
         route.path: {"summary": "Slackware news and announcements"},
     },

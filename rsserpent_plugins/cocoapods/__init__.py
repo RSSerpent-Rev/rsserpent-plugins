@@ -1,6 +1,7 @@
-from rsserpent_rev.models import Persona, Plugin
+from rsserpent_rev.models import FeedRoute, Persona, Plugin
 from rsserpent_rev.utils import HTTPClient
 
+from ..csj_sdk_update.route import Settings
 from . import route
 
 plugin = Plugin(
@@ -12,14 +13,18 @@ plugin = Plugin(
     ),
     prefix="/cocoapods",
     repository="https://github.com/RSSerpent-Rev/rsserpent-plugin-cocoapods",
-    routers={route.path: route.provider},
-    lifespan=lambda: HTTPClient(trust_env=False),
+    routers={route.path: FeedRoute(route.provider, route.Parameters)},
+    settings_model=Settings,
+    http_client=lambda: HTTPClient(trust_env=False),
     route_docs={
         route.path: {
             "summary": "Releases of a CocoaPods package",
             "parameters": {"pod": "Exact pod name, including its letter case."},
             "examples": [
-                {"label": "Google Mobile Ads SDK", "path": {"pod": "Google-Mobile-Ads-SDK"}},
+                {
+                    "label": "Google Mobile Ads SDK",
+                    "path": {"pod": "Google-Mobile-Ads-SDK"},
+                },
             ],
         },
     },
